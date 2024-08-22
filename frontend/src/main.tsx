@@ -7,23 +7,28 @@ import Feed from './pages/Feed.tsx'
 import Profile from './pages/Profile.tsx'
 import Upload from './pages/Upload.tsx'
 import Post from './pages/Post.tsx'
+import ProtectedRoutes from './components/ProtectedRoutes.tsx'
 
 const route = createBrowserRouter([
   {
     path:'/',
-    element: <Feed />
+    element:  <ProtectedRoutes>
+                <Feed /> 
+              </ProtectedRoutes>
   },
   {
     path: '/profile/:id',
-    element: <Profile />
+    element:  <Profile />
   },
   {
     path: '/upload',
-    element: <Upload />
+    element:  <ProtectedRoutes>
+                <Upload />
+              </ProtectedRoutes>
   },
   {
     path: '/post/:id',
-    element: <Post />
+    element:  <Post />
   }
 ])
 
