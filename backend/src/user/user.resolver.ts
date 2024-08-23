@@ -3,9 +3,10 @@ import { UserService } from './user.service';
 import { AuthService } from 'src/auth/auth.service';
 import { LoginResponse, RegisterResponse } from 'src/auth/types';
 import { RegisterDto } from 'src/auth/dto/register.dto';
-import { BadRequestException } from '@nestjs/common';
+import { BadRequestException, UseFilters } from '@nestjs/common';
 import { Response, Request } from 'express';
 import { LoginDto } from 'src/auth/dto/login.dto';
+import { GraphQLErrorFilter } from 'src/filters/custom-exception.filter';
 
 @Resolver()
 export class UserResolver {
@@ -15,6 +16,7 @@ export class UserResolver {
         private readonly userService: UserService
     ) {}
 
+    @UseFilters(GraphQLErrorFilter)
     @Mutation(() => RegisterResponse)
     async register(
         @Args('registerInput') registerDto: RegisterDto,
@@ -26,20 +28,13 @@ export class UserResolver {
                     confirmPassword: 'Passwords do not match',
                 })    
         };
-
-        try{
-            const { user } = await this.authService.register(registerDto, context.res);
-            console.log("user: ", user);
-            return { user };
-        } catch(error) {
-            return {
-                error: {
-                    message: error.message,
-                }
-            }
-        }
+        
+        const { user } = await this.authService.register(registerDto, context.res);
+        console.log("user: ", user);
+        return { user };
     }
 
+    @UseFilters(GraphQLErrorFilter)
     @Mutation(() => LoginResponse)
     async login(
         @Args('loginInput') loginDto: LoginDto,

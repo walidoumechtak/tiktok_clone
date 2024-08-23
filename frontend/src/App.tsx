@@ -1,11 +1,12 @@
 import { useState } from 'react'
+import AuthModal from './components/AuthModal'
 
 
 function App() {
 
   return (
-    <div className='bg-red-500'>
-      <h1>Counter App</h1>
+    <div>
+      <AuthModal />
     </div>
   )
 }

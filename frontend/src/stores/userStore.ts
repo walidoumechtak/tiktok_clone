@@ -10,8 +10,8 @@ export interface User {
 }
 
 export interface UserActions {
-    setUser: (user: User) => void;
-    logout: () => void;
+    setUser: (user: User) => void; // login
+    logout: () => void; // logout
 }
 
 

@@ -8,8 +8,12 @@ import Profile from './pages/Profile.tsx'
 import Upload from './pages/Upload.tsx'
 import Post from './pages/Post.tsx'
 import ProtectedRoutes from './components/ProtectedRoutes.tsx'
+import { ApolloProvider } from "@apollo/client"
+import { client } from './utils/apolloClient.ts'
+import ReactDOM from 'react-dom'
+import React from 'react'
 
-const route = createBrowserRouter([
+const router = createBrowserRouter([
   {
     path:'/',
     element:  <ProtectedRoutes>
@@ -30,11 +34,23 @@ const route = createBrowserRouter([
     path: '/post/:id',
     element:  <Post />
   }
-])
+]);
 
-createRoot(document.getElementById('root')!).render(
-  <StrictMode>
-    <RouterProvider router={route} />
-    <App />
-  </StrictMode>,
+createRoot(document.getElementById("root")!).render(
+  <React.StrictMode>
+    <ApolloProvider client={client}>
+      <RouterProvider router={router} />
+
+      <App />
+    </ApolloProvider>
+  </React.StrictMode>
 )
+
+// createRoot(document.getElementById('root')!).render(
+//   <StrictMode>
+//     <ApolloProvider client={client}>
+//       <RouterProvider router={router} />
+//       <App />
+//     </ApolloProvider>
+//   </StrictMode>
+// )
