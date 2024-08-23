@@ -18,6 +18,7 @@ function Login() {
         email: "",
         password: "",
     });
+    const [invalidCredentials, setInvalidCredentials] = useState("");
 
     const handleLogin = async () => {
         setErrors({});
@@ -27,7 +28,10 @@ function Login() {
                 password: loginData.password,
             }
         }).catch(err => {
-            setErrors(err.graphQLErrors[0].extensions);
+            if (err.graphQLErrors[0].extensions?.invalidCredentials)
+                setInvalidCredentials(err.graphQLErrors[0].extensions.invalidCredentials);
+            else
+                setErrors(err.graphQLErrors[0].extensions);
         })
         if (data?.login.user) {
             setUser({
@@ -36,6 +40,7 @@ function Login() {
                 email: data.login.user.email,
             });
             setLoginIsOpen(true);
+            setInvalidCredentials("");
         }
     }
     return (
@@ -61,7 +66,8 @@ function Login() {
                     autoFocus={false}
                 />
             </div>
-            <div className="mx-6 mt-6">
+            <span className="mx-6 text-red-500 font-semibold">{invalidCredentials}</span>
+            <div className="mx-6 mt-2">
                 <button
                     disabled={
                         !loginData.email ||

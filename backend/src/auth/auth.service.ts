@@ -66,8 +66,8 @@ export class AuthService {
             secret: this.configService.get<string>('REFRESH_TOKEN_SECRET'),
             expiresIn: '7d',
         });
-        response.cookie('refresh-token', refreshToken, {httpOnly: true});
-        response.cookie('access-token', accessToken, {httpOnly: true});
+        res.cookie('refresh-token', refreshToken, {httpOnly: true});
+        res.cookie('access-token', accessToken, {httpOnly: true});
         
         return { user };
     }
