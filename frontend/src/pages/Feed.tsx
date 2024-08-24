@@ -1,8 +1,11 @@
+import MainLayout from "../layouts/MainLayout";
 
 function Feed() {
     return (  
         <div>
-            <h1>Feed</h1>
+            <MainLayout>
+                Feed
+            </MainLayout>
         </div>
     );
 }
