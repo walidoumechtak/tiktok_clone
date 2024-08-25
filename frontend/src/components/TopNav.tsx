@@ -120,8 +120,11 @@ function TopNav() {
                             />
                         </button>
                         {/* drow down menu for profile icon */}
-                        <div className="absolute bg-white rounded-lg w-[200px] shadow-xl*:
-                            border top-[46px] -right-2">
+                        <div className={[showMenu ? 'absolute' : 'hidden',
+                            'bg-white rounded-lg w-[200px] shadow-xl border top-[46px] -right-2'
+                        ].join(" ")}>
+                        {/* <div className="absolute bg-white rounded-lg w-[200px] shadow-xl
+                            border top-[46px] -right-2"> */}
                             <Link
                                 to={`/profile/${user.id}`}
                                 onClick={() => setShowMenu(!showMenu)}
