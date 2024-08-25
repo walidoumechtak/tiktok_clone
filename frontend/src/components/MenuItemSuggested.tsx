@@ -2,13 +2,14 @@ import { AiOutlineCheck } from "react-icons/ai"
 import { User } from "../gql/graphql"
 
 
-function MenuItemFollow({ user }: { user: User }) {
+function MenuItemSuggested({ user }: { user: User }) {
+    console.table(user)
     return (
-        <div className="felx items-center hover:bg-gray-100 rounded-md w-full py-1.5 px-2">
+        <div className="flex items-center hover:bg-gray-100 rounded-md w-full py-1.5 px-2">
             <img
                 className="rounded-full lg:mx-0 mx-auto"
                 width={35}
-                src={user?.image ? user.image : "https://www.gravatar.com/avatar/"}
+                src={user?.image ? user.image : "https://picsum.photos/200"}
             />
             <div className="lg:pl-2.5 lg:block hidden">
                 <div className="flex items-center">
@@ -25,4 +26,4 @@ function MenuItemFollow({ user }: { user: User }) {
     )
 }
 
-export default MenuItemFollow
+export default MenuItemSuggested

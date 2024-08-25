@@ -136,7 +136,7 @@ function TopNav() {
                                 user.id && (
                                     <div
                                         onClick={handleLogout}
-                                        className="flex border-t items-center px-4 py-3 text-sm text-red-400 hover:bg-gray-100"
+                                        className="flex cursor-pointer border-t items-center px-4 py-3 text-sm text-red-400 hover:bg-gray-100"
                                     >
                                         <GrLogout size={20} className="text-red-400"/>
                                         <span className="px-3 text-sm font-semibold text-red-400">
