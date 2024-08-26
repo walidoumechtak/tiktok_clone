@@ -5,7 +5,7 @@ import SideNav from '../components/SideNav';
 
 function UploadLayout({children} : {children: React.ReactNode}) {
     return (
-        <div className='bg-[#F8f8f8] h-[100vh]'>
+        <div className='bg-[#F8f8f8] h-[100%]'>
             <TopNav/>
             <div className='flex justify-between mx-auto w-full px-2 max-w-[1140px]'>
                 {children}
