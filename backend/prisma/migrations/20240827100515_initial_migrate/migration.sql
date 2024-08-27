@@ -17,7 +17,7 @@ CREATE TABLE "Post" (
     "id" SERIAL NOT NULL,
     "user_id" INTEGER NOT NULL,
     "text" TEXT NOT NULL,
-    "vedio" TEXT NOT NULL,
+    "video" TEXT NOT NULL,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
 

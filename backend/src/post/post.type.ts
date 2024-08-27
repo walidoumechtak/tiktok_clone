@@ -1,34 +1,31 @@
-import { Field, Int, ObjectType } from "@nestjs/graphql";
-import { User } from "src/user/user.model";
+import { ObjectType, Field, Int } from '@nestjs/graphql';
+import { LikeType } from 'src/like/like.type';
+import { User } from 'src/user/user.model';
 
 @ObjectType()
-export class PostType{
-    @Field(() => Int)
-    id: number;
+export class PostType {
+    
+  @Field(() => Int)
+  id: number;
 
-    @Field()
-    text: string;
+  @Field()
+  text: string;
 
-    @Field()
-    createdAt: Date;
+  @Field()
+  createdAt: Date;
 
-    @Field()
-    video: string;
+  @Field()
+  video: string;
 
-    @Field(() => User)
-    user: User;
+  @Field(() => User)
+  user?: User;
 
-    @Field(() => [LikeType], {nullable: true})
-    likes?: LikeType;
+  @Field(() => [LikeType], { nullable: true })
+  likes?: LikeType[];
 }
 
-export class LikeType{
-    @Field(() => Int)
-    id: number;
-
-    @Field(() => User)
-    user: User;
-
-    @Field(() => PostType)
-    post: PostType;
+@ObjectType()
+export class PostDetails extends PostType {
+  @Field(() => [Number], { nullable: true })
+  otherPostIds?: number[];
 }
