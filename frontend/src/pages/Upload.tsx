@@ -27,15 +27,16 @@ function Upload() {
     const [fileDisplay, setFileDisplay] = React.useState<string | undefined>(undefined);
     const [caption, setCaption] = React.useState<string>("");
 
-    const [createPost, { data, loading, error }] = useMutation(CREATE_POST, {
-        onError: (error) => {
-            setErrors(error.graphQLErrors[0].extensions?.errors);
+    const [createPost, { loading }] = useMutation(CREATE_POST, {
+        onError: (err) => {
+          console.log(err)
+          setErrors(err.graphQLErrors[0].extensions?.errors)
         },
         variables: {
-            text: caption,
-            video: fileData,
-        }
-    });
+          text: caption,
+          video: fileData,
+        },
+    })
 
     const handleCreatePost = async () => {
         try {

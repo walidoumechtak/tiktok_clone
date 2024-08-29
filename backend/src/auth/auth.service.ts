@@ -1,120 +1,131 @@
-import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
-import { PrismaService } from 'src/prisma.service';
-import { User } from 'src/user/user.model';
-import * as bcrypt from 'bcrypt';
-import { Response, Request, response } from 'express';
-import { ConfigService } from '@nestjs/config';
-import { LoginDto } from './dto/login.dto';
-import { RegisterDto } from './dto/register.dto';
-
-@Injectable()
-export class AuthService {
+// auth.service.ts
+import {
+    BadRequestException,
+    Injectable,
+    UnauthorizedException,
+  } from '@nestjs/common';
+  import { JwtService } from '@nestjs/jwt';
+  import { PrismaService } from '../prisma.service'; // Your Prisma service
+  import { LoginDto } from './dto/login.dto';
+  import { RegisterDto} from './dto/register.dto';
+  import * as bcrypt from 'bcrypt';
+  import { Response, Request } from 'express';
+  import { User } from '@prisma/client';
+  import { ConfigService } from '@nestjs/config';
+  
+  @Injectable()
+  export class AuthService {
     constructor(
-        private prisma: PrismaService,
-        private jwtService: JwtService,
-        private configService: ConfigService,
+      private readonly jwtService: JwtService,
+      private readonly prisma: PrismaService,
+      private readonly configService: ConfigService,
     ) {}
-
-
-    async refreshToken(req: Request, res: Response) {
-        const refreshToken = req.cookies['refresh-token'];
-
-        if (!refreshToken) {
-            throw new UnauthorizedException('No refresh token provided 404');
-        }
-        let payload;
-        try {
-            payload = this.jwtService.verify(refreshToken, {
-                secret: this.configService.get<string>('REFRESH_TOKEN_SECRET'),
-            });
-        } catch (error) {
-            throw new UnauthorizedException('Invalid or expired refresh token');   
-        }
-        const userExist = await this.prisma.user.findUnique({
-            where: {
-                id: payload.sub,
-            }
-        })
-
-        if (!userExist) {
-            throw new BadRequestException('User not found');
-        }
-        const expireIn = 15001;
-        const expiration = Math.floor(Date.now() / 1000) + expireIn;
-        const accessToken = this.jwtService.sign(
-            {...payload, exp: expiration},
-            {
-                secret: this.configService.get<string>('ACCESS_TOKEN_SECRET'),
-            }
-        );
-        res.cookie('access-token', accessToken, {httpOnly: true});
-        return accessToken;
-    }
-    
-    private async issueTokens(user: User, res: Response) {
-        const payload = {username: user.fullName, sub: user.id};
-
-        const accessToken = this.jwtService.sign(
-            {...payload},
-            {
-                secret: this.configService.get<string>('ACCESS_TOKEN_SECRET'),
-                expiresIn: '150sec',
-            }
-        )
-        const refreshToken = this.jwtService.sign(payload, {
-            secret: this.configService.get<string>('REFRESH_TOKEN_SECRET'),
-            expiresIn: '7d',
+    async refreshToken(req: Request, res: Response): Promise<string> {
+      const refreshToken = req.cookies['refresh_token'];
+  
+      if (!refreshToken) {
+        throw new UnauthorizedException('Refresh token not found');
+      }
+  
+      let payload;
+      try {
+        payload = this.jwtService.verify(refreshToken, {
+          secret: this.configService.get<string>('REFRESH_TOKEN_SECRET'),
         });
-        res.cookie('refresh-token', refreshToken, {httpOnly: true});
-        res.cookie('access-token', accessToken, {httpOnly: true});
-        
-        return { user };
+      } catch (error) {
+        throw new UnauthorizedException('Invalid or expired refresh token');
+      }
+  
+      const userExists = await this.prisma.user.findUnique({
+        where: { id: payload.sub },
+      });
+  
+      if (!userExists) {
+        throw new BadRequestException('User no longer exists');
+      }
+  
+      const expiresIn = 15000; // seconds
+      const expiration = Math.floor(Date.now() / 1000) + expiresIn;
+      const accessToken = this.jwtService.sign(
+        { ...payload, exp: expiration },
+        {
+          secret: this.configService.get<string>('ACCESS_TOKEN_SECRET'),
+        },
+      );
+  
+      res.cookie('access_token', accessToken, { httpOnly: true });
+  
+      return accessToken;
     }
-
-    async validateUser(loginDto: LoginDto){
-        const user = await this.prisma.user.findUnique({
-            where: {
-                email: loginDto.email,
-            }
-        })
-        if (user && await bcrypt.compare(loginDto.password, user.password)) {
-            return user;
-        }
-        return null;
+    private async issueTokens(user: User, response: Response) {
+      const payload = { username: user.fullName, sub: user.id };
+  
+      const accessToken = this.jwtService.sign(
+        { ...payload },
+        {
+          secret: this.configService.get<string>('ACCESS_TOKEN_SECRET'),
+          expiresIn: '150sec',
+        },
+      );
+  
+      const refreshToken = this.jwtService.sign(payload, {
+        secret: this.configService.get<string>('REFRESH_TOKEN_SECRET'),
+        expiresIn: '7d',
+      });
+  
+      response.cookie('access_token', accessToken, { httpOnly: true });
+      response.cookie('refresh_token', refreshToken, {
+        httpOnly: true,
+      });
+  
+      return { user };
     }
-
+    async validateUser(loginDto: LoginDto): Promise<any> {
+      const user = await this.prisma.user.findUnique({
+        where: { email: loginDto.email },
+      });
+      if (user && (await bcrypt.compare(loginDto.password, user.password))) {
+        return user;
+      }
+      return null;
+    }
+  
     async register(registerDto: RegisterDto, response: Response) {
-        const existedUser = await this.prisma.user.findUnique({
-            where: {
-                email: registerDto.email,
-            }
-        });
-        if (existedUser) {
-            throw new BadRequestException({email: 'Email already exists'});
-        }
-        const hashedPassword = await bcrypt.hash(registerDto.password, 10);
-        const user = await this.prisma.user.create({
-            data: {
-                fullName: registerDto.fullName,
-                email: registerDto.email,
-                password: hashedPassword,
-            }
-        });
-        return this.issueTokens(user, response);
+      console.log('registerDto!!!', registerDto);
+      const existingUser = await this.prisma.user.findUnique({
+        where: { email: registerDto.email },
+      });
+  
+      if (existingUser) {
+        throw new Error('Email already in use'); // Provide a proper error response
+      }
+  
+      const hashedPassword = await bcrypt.hash(registerDto.password, 10);
+  
+      const user = await this.prisma.user.create({
+        data: {
+          fullName: registerDto.fullName,
+          password: hashedPassword,
+          email: registerDto.email,
+        },
+      });
+      console.log('user!!!', user);
+      return this.issueTokens(user, response); // Issue tokens on registration
     }
-
+  
     async login(loginDto: LoginDto, response: Response) {
-        const user = await this.validateUser(loginDto);
-        if (!user) {
-            throw new BadRequestException({ invalidCredentials: 'Invalid credentials'});
-        }
-        return this.issueTokens(user, response);
+      const user = await this.validateUser(loginDto);
+  
+      if (!user) {
+        throw new Error('Invalid credentials'); // Provide a proper error response
+      }
+  
+      return this.issueTokens(user, response); // Issue tokens on login
     }
-
+  
     async logout(response: Response) {
-        response.clearCookie('refresh-token');
-        response.clearCookie('access-token');
-        return 'Logged out successfully';
+      response.clearCookie('access_token');
+      response.clearCookie('refresh_token');
+      return 'Successfully logged out';
     }
-}
+  }

@@ -39,12 +39,13 @@ export class PostService {
     }
 
     async createPost(data: Prisma.PostCreateInput): Promise<Post> {
+      console.log('data ---------> ', data);
         return await this.prisma.post.create({
           data: data,
         });
-      }
+    }
 
-    async getPostById(id: number): Promise<{}> {
+    async getPostById(id: number): Promise<PostDetails> {
     try {
       const post = await this.prisma.post.findUnique({
         where: { id },
@@ -70,5 +71,25 @@ export class PostService {
             include: { user: true, likes: true, comments: true },
             orderBy: { createdAt: 'desc' },
         })
+    }
+
+    async getPostsByUserId(userId: number): Promise<PostType[]> {
+      return await this.prisma.post.findMany({
+        where: {
+          userId: userId,
+        },
+        include: {user: true}
+      })
+    }
+
+    async deletePost(id: number): Promise<void> {
+      const post = await this.getPostById(id);
+      try {
+        const fs = await import('fs');
+        fs.unlinkSync(`public${post.video}`);
+      }catch(error) {
+        throw new NotFoundException(error.message);
+      }
+      await this.prisma.post.delete({ where: {id}});
     }
 }

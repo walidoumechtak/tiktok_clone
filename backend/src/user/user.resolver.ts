@@ -67,14 +67,12 @@ export class UserResolver {
     // refreshToken() will be used to refresh the access token. 
 
     @Mutation(() => String)
-    async refreshToken(
-        @Context() context: { req: Request, res: Response }
-    ) {
-        try {
-            return this.authService.refreshToken(context.req, context.res);
-        } catch (error) {
-            throw new BadRequestException(error.message)
-        }
+    async refreshToken(@Context() context: { req: Request; res: Response }) {
+      try {
+        return this.authService.refreshToken(context.req, context.res);
+      } catch (error) {
+        throw new BadRequestException(error.message);
+      }
     }
 
     // ****************************************************************************
