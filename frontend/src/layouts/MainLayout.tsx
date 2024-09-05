@@ -13,9 +13,11 @@ function MainLayout({children} : {children: React.ReactNode}) {
                 useLocation().pathname === '/' ? 'max-w-[1240px]' : "",
                 "flex justify-between mx-auto w-full lg:px-2.5 px-0"
             ].join(" ")}>
-                <SideNav />
-            </div>
+                <div>
+                    <SideNav />
+                </div>
             {children}
+            </div>
         </div>
     )
 }
