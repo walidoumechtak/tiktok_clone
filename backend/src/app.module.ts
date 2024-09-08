@@ -11,6 +11,10 @@ import { UserModule } from './user/user.module';
 import { PostModule } from './post/post.module';
 import { LikeModule } from './like/like.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
+<<<<<<< HEAD
+=======
+import { CommentModule } from './comment/comment.module';
+>>>>>>> 3f55ca3068809a2923a1f52286b513311eef1362
 
 @Module({
   imports: [
@@ -32,6 +36,10 @@ import { ServeStaticModule } from '@nestjs/serve-static';
     UserModule,
     PostModule,
     LikeModule,
+<<<<<<< HEAD
+=======
+    CommentModule,
+>>>>>>> 3f55ca3068809a2923a1f52286b513311eef1362
   ],
   controllers: [AppController],
   providers: [AppService, PrismaService],
