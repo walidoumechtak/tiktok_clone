@@ -1,9 +1,4 @@
 import { Injectable } from '@nestjs/common';
-<<<<<<< HEAD
-
-@Injectable()
-export class LikeService {}
-=======
 import { PrismaService } from 'src/prisma.service';
 import { CreateLikeDto } from './createLike.dto';
 
@@ -30,4 +25,3 @@ export class LikeService {
         })
     }
 }
->>>>>>> 3f55ca3068809a2923a1f52286b513311eef1362

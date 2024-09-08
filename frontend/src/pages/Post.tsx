@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ImCross } from "react-icons/im";
 import { BiChevronUp, BiChevronDown } from "react-icons/bi";
 import { ImSpinner } from "react-icons/im";
@@ -16,12 +16,13 @@ import { useUserStore } from "../stores/userStore";
 import { usePostStore } from "../stores/postStore";
 import { LIKE_POST } from "../graphql/mutations/LikePost";
 import { UNLIKE_POST } from "../graphql/mutations/UnlikePost";
+import { create } from "zustand";
 
 function Post() {
     const { id } = useParams<{id: string}>();
     const navigate = useNavigate();
     const [comment, setComment] = useState("");
-    const [CreateComment, {data: commentData}] = useMutation(CREATE_COMMENT, {
+    const [createComment, {data: commentData}] = useMutation(CREATE_COMMENT, {
         refetchQueries: [{
             query: GET_COMMENTS_BY_POST_ID,
             variables: {
@@ -67,13 +68,13 @@ function Post() {
     }
 
     const [ currentPostIndex, setCurrentPostIndex ] = useState(0);
-    const [loeaded, setIsloeaded] = useState(false);
+    const [loaded, setIsloaded] = useState(false);
     const {data: postData, loading: loadingPost} = useQuery(GET_POST_BY_ID, {
         variables: {
             id: Number(id)
         },
         onCompleted: () => {
-            setIsloeaded(true);
+            setIsloaded(true);
         }
     });
     const loopThroughPostsUp = () => {
@@ -92,6 +93,90 @@ function Post() {
         setCurrentPostIndex(currentPostIndex - 1);
         const nextPostId = postData?.getPostsById.otherPostIds[currentPostIndex]
         navigate(`/post/${nextPostId}`);
+    }
+
+    const addComment = async () => {
+        await createComment({
+            variables: {
+                postId: Number(id),
+                text: comment
+            }
+        });
+        setComment("");
+    }
+
+    const video = useRef<HTMLVideoElement>(null);
+    const [inputFocussed, setInputFocussed] = useState(false);
+
+    useEffect(() => {
+        const handleLoadedData = () => {
+            video.current?.play();
+            setTimeout(() => {
+                setIsloaded(true);
+            }, 300);
+        }
+        const videoRef = video.current;
+        videoRef?.addEventListener("loadeddata", handleLoadedData);
+        return () => {
+            if (!videoRef) return;
+            videoRef.removeEventListener("loadeddata", handleLoadedData);
+            videoRef.pause();
+            videoRef.currentTime = 0;
+            videoRef.load();
+        }
+    }, [loaded, setIsloaded])
+
+    const [isPlaying, setIsPlaying] = useState(false);
+
+    const handleVideoPlay = () => {
+        if (video.current) {
+            if (isPlaying)
+                video.current.pause();
+            else
+                video.current.play();
+            setIsPlaying(!isPlaying);
+        }
+    }
+
+    const likedPosts = usePostStore((state) => state.likedPosts);
+    const likePost = usePostStore((state) => state.likePost);
+    const removeLike = usePostStore((state) => state.removeLike);
+    const loggedInUserId = useUserStore((state) => state.id);
+
+    const [likePostMutation] = useMutation(LIKE_POST, {
+        variables: {
+            postId: Number(id),
+        },
+        refetchQueries: [{
+            query: GET_POST_BY_ID,
+            variables: {
+                id: Number(id),
+            },
+        }],
+    });
+
+    const [removeLikeMutation] = useMutation(UNLIKE_POST, {
+        variables: {
+            postId: Number(id),
+        },
+        refetchQueries: [{
+            query: GET_POST_BY_ID,
+            variables: {
+                id: Number(id),
+            },
+        }],
+    });
+
+    const handleRemoveLike = async () => {
+        if (loggedInUserId == postData?.getPostById.user.id) return; // User can't like their own post
+        await removeLikeMutation();
+        removeLike(Number(id));
+    }
+
+    const handleLikePost = async () => {
+        if (loggedInUserId == postData?.getPostById.user.id) return; // User can't like their own post
+        await likePostMutation();
+        likePost({id: Math.random(), postId: Number(id), userId: Number(loggedInUserId)});
     }
 
     return (  

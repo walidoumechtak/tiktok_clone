@@ -1,9 +1,3 @@
-<<<<<<< HEAD
-import { Resolver } from '@nestjs/graphql';
-
-@Resolver()
-export class LikeResolver {}
-=======
 import { Args, Context, Mutation, Resolver } from '@nestjs/graphql';
 import { GraphqlAuthGuard } from 'src/auth/graphql-auth.guard';
 import { LikeService } from './like.service';
@@ -37,4 +31,3 @@ export class LikeResolver {
         return this.likeService.unlikePost(postId, ctx.req.user.sub);
     }
 }
->>>>>>> 3f55ca3068809a2923a1f52286b513311eef1362
