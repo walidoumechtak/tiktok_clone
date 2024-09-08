@@ -10,9 +10,14 @@ import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
 import { PostModule } from './post/post.module';
 import { LikeModule } from './like/like.module';
+import { ServeStaticModule } from '@nestjs/serve-static';
 
 @Module({
   imports: [
+	  ServeStaticModule.forRoot({
+	  	rootPath: join(__dirname, '..', 'public'),
+		  serveRoot: '/',
+	  }),
     GraphQLModule.forRoot({
       driver: ApolloDriver,
       autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
