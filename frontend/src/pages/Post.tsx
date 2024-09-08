@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { ImCross } from "react-icons/im";
+import { ImCross, ImSpinner2 } from "react-icons/im";
 import { BiChevronUp, BiChevronDown } from "react-icons/bi";
 import { ImSpinner } from "react-icons/im";
 import { MdOutlineDeleteForever } from "react-icons/md";
@@ -128,7 +128,7 @@ function Post() {
 
     const [isPlaying, setIsPlaying] = useState(false);
 
-    const handleVideoPlay = () => {
+    const toggleVideoPlay = () => {
         if (video.current) {
             if (isPlaying)
                 video.current.pause();
@@ -179,9 +179,57 @@ function Post() {
         likePost({id: Math.random(), postId: Number(id), userId: Number(loggedInUserId)});
     }
 
+    const isLiked = likedPosts.some((likedPost) => { // Check if the post is liked by the user or not [icon like red or black]
+        if (!likedPost) return false;
+        return likedPost.postId === Number(loggedInUserId)
+    });
+
     return (  
-        <div>
-            <h1>Post</h1>
+        <div
+            id="post"
+            className="fixed lg:flex justify-between z-50 top-0 left-0 w-full h-full bg-black lg:overflow-hidden overflow-auto"
+        >
+            <div className="lg:w-[calc(100%-540px)] h-full relative">
+                <Link
+                    className="absolute z-20 m-5 rounded-full hover:bg-gray-800 bg-gray-700 p-1.5"
+                    to="/">
+                    {" "}
+                    <ImCross size={25} color="#FFFFFF" />
+                </Link>
+                <button
+                    className="absolute z-20 right-4 top-4 flex items-center justify-center rounded-full p-1.5 bg-gray-700 hover:bg-gray-800"
+                >
+                    <BiChevronUp size={25} color="#FFFFFF" onClick={loopThroughPostsUp} />
+                </button>
+                <button
+                    className="absolute z-20 right-4 top-20 flex items-center justify-center rounded-full p-1.5 bg-gray-700 hover:bg-gray-800"
+                >
+                    <BiChevronDown size={25} color="#FFFFFF" onClick={loopThroughPostsDown} />
+                </button>
+                <img 
+                    className="absolute top-[18px] left-[70px] max-w-[8px] rounded-full lg:mx-0 mx-auto"
+                    src="/src/assets/images/tiktok-logo-small.png"
+                />
+            </div>
+            <div className="flex items-center justify-center bg-black bg-opacity-70 h-screen lg:min-w-[400px]">
+                <ImSpinner2 className="animate-spin ml-1" size={"100"} color="#FFFFFF" />
+            </div>
+            <div 
+                className="bg-black bg-opacity-90 lg:min-w-[480px]"
+                onClick={toggleVideoPlay}
+            >
+                <video
+                    ref={video}
+                    src={"http://localhost:3000" + postData?.getPostById.video}
+                    loop
+                    muted
+                    className="h-screen mx-auto"
+                />
+                <AiFillPlayCircle
+                    size={"100"}
+                    className="rounded-full z-100 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-balckcursor-pointer"
+                />
+            </div>
         </div>
     );
 }
