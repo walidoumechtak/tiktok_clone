@@ -49,14 +49,14 @@ export class PostService {
     try {
       const post = await this.prisma.post.findUnique({
         where: { id },
-        // include: { user: true, likes: true, comments: true },
+        include: { user: true, likes: true, comments: true },
       });
       // get all other post ids of the user with the post above
       const postIds = await this.prisma.post.findMany({
         where: { userId: post.userId },
         select: { id: true },
       });
-
+      // console.log("get post by id =============== ", { ...post, otherPostIds: postIds.map((post) => post.id) });
       return { ...post, otherPostIds: postIds.map((post) => post.id) };
     } catch (error) {
       throw new NotFoundException(error.message);
