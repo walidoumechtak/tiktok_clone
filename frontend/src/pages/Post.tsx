@@ -11,7 +11,7 @@ import { CREATE_COMMENT } from "../graphql/mutations/CreateComment";
 import { GET_COMMENTS_BY_POST_ID } from "../graphql/queries/GetCommentsByPostId";
 import { useMutation, useQuery } from "@apollo/client";
 import { DELETE_COMMENT } from "../graphql/mutations/DeleteComment";
-import { GetCommentsByPostIdDocument, GetCommentsByPostIdQuery } from "../gql/graphql";
+import { GetCommentsByPostIdDocument, GetCommentsByPostIdQuery, GetPostByIdQuery } from "../gql/graphql";
 import { useUserStore } from "../stores/userStore";
 import { usePostStore } from "../stores/postStore";
 import { LIKE_POST } from "../graphql/mutations/LikePost";
@@ -20,6 +20,7 @@ import { create } from "zustand";
 
 function Post() {
     const { id } = useParams<{id: string}>();
+    console.log("id =========> ", id);
     const navigate = useNavigate();
     const [comment, setComment] = useState("");
     const [createComment, {data: commentData}] = useMutation(CREATE_COMMENT, {
@@ -74,15 +75,19 @@ function Post() {
             id: Number(id)
         },
         onCompleted: () => {
+            console.log("post data =========> " ,postData);
             setIsloaded(true);
+        },
+        onError: (error) => {
+            console.log("error =========> ", error);
         }
-    });
+    }); 
     const loopThroughPostsUp = () => {
-        if (currentPostIndex === postData?.getPostsById.length - 1) {
+        if (currentPostIndex === postData?.getPostById.otherPostIds?.length ? postData?.getPostById.otherPostIds?.length : 1 - 1) {
             return;
         }
         setCurrentPostIndex(currentPostIndex + 1);
-        const nextPostId = postData?.getPostsById.otherPostIds[currentPostIndex]
+        const nextPostId = postData?.getPostById?.otherPostIds ? postData?.getPostById?.otherPostIds[currentPostIndex] : null;
         navigate(`/post/${nextPostId}`);
     }
 
@@ -91,7 +96,7 @@ function Post() {
             return;
         }
         setCurrentPostIndex(currentPostIndex - 1);
-        const nextPostId = postData?.getPostsById.otherPostIds[currentPostIndex]
+        const nextPostId = postData?.getPostById?.otherPostIds ? postData?.getPostById?.otherPostIds[currentPostIndex] : null;
         navigate(`/post/${nextPostId}`);
     }
 
@@ -207,13 +212,14 @@ function Post() {
                     <BiChevronDown size={25} color="#FFFFFF" onClick={loopThroughPostsDown} />
                 </button>
                 <img 
-                    className="absolute top-[18px] left-[70px] max-w-[8px] rounded-full lg:mx-0 mx-auto"
+                    className="absolute top-[18px] left-[70px] max-w-[80px] rounded-full lg:mx-0 mx-auto"
                     src="/src/assets/images/tiktok-logo-small.png"
                 />
             </div>
+            { loadingPost ? (
             <div className="flex items-center justify-center bg-black bg-opacity-70 h-screen lg:min-w-[400px]">
                 <ImSpinner2 className="animate-spin ml-1" size={"100"} color="#FFFFFF" />
-            </div>
+            </div> ) : ( 
             <div 
                 className="bg-black bg-opacity-90 lg:min-w-[480px]"
                 onClick={toggleVideoPlay}
@@ -227,8 +233,59 @@ function Post() {
                 />
                 <AiFillPlayCircle
                     size={"100"}
-                    className="rounded-full z-100 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-balckcursor-pointer"
+                    className="rounded-full z-100 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-balck cursor-pointer"
                 />
+            </div>
+            )}
+            <div 
+                className="lg-max-w-[550px] relative w-full h-full bg-white"
+                id="InfoSection"    
+            >
+                <div className="py-7"/>
+                <div
+                    className="flex items-center justify-between px-8"
+                >
+                    <div className="flex items-center">
+                        <Link to="/">
+                            <img 
+                                width={"40"}
+                                className="rounded-full lg:mx-0 mx-auto"
+                                src={
+                                    postData?.getPostById.user.image ?
+                                        postData?.getPostById.user.image :
+                                        "https://picsum.photos/id/237/200/300"
+                                }
+                            />
+                        </Link>
+                        <div className="ml-3 pt-0.5">
+                            <div className="text-[17px] font-semibold">User name</div>
+                            <div className="text-[13px] font-light -mt-5">
+                                { postData?.getPostById?.user.fullName }
+                                <span className="relative top-[6px] text-[30px] pr-0.5">•</span>
+                                <span className="font-medium">
+                                    { new Date(postData?.getPostById.createdAt).toLocaleDateString() }
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <MdOutlineDeleteForever size={25} className="cursor-pointer" />
+                </div>
+                <div className="px-8 mt-4 text-sm"> {postData?.getPostById?.text} </div>
+                <div className="px-8 mt-4 text-sm font-bold">
+                    <BsMusicNoteBeamed size="17" />
+                    Original sound - {postData?.getPostById?.user.fullName}
+                </div>
+                <div className="flex items-center px-8 mt-8">
+                    <div className="pb-4 text-center flex items-center">
+                        <button
+                            disabled={postData?.getPostById?.user.id === loggedInUserId}
+                            className="rounded-full bg-gray-200 p-2 cussor-pointer"
+                            onClick={() => (isLiked ? handleRemoveLike() : handleLikePost())}
+                        >
+                            <AiFillHeart size={"25"} color={isLiked ? "red" : "black"}/>
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     );
