@@ -52,6 +52,7 @@ export class PostResolver {
     } 
 
     // Query to get posts by user id ==============================
+    @Query(() => [PostType])
     async getPostsByUserId(
         @Args('userId') userId: number,
     ): Promise<PostType[]> {

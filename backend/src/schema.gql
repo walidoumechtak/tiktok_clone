@@ -48,6 +48,7 @@ type Mutation {
   refreshToken: String!
   register(registerInput: RegisterDto!): RegisterResponse!
   unlikePost(postId: Float!): LikeType!
+  updateUserProfile(bio: String, fullName: String, image: Upload): User!
 }
 
 type PostDetails {
@@ -73,6 +74,7 @@ type Query {
   getCommentsByPostId(postId: Float!): [Comment!]!
   getPostById(id: Float!): PostDetails!
   getPosts(skip: Int! = 0, take: Int! = 1): [PostType!]!
+  getPostsByUserId(userId: Float!): [PostType!]!
   getUsers: [User!]!
   hello: String!
 }
@@ -94,11 +96,11 @@ scalar Upload
 
 type User {
   bio: String
-  createdAt: DateTime!
+  createdAt: DateTime
   email: String!
   fullName: String!
   id: Float!
   image: String
-  password: String!
-  updatedAt: DateTime!
+  password: String
+  updatedAt: DateTime
 }

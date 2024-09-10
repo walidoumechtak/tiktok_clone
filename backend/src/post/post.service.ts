@@ -57,7 +57,7 @@ export class PostService {
         select: { id: true },
       });
       // console.log("get post by id =============== ", { ...post, otherPostIds: postIds.map((post) => post.id) });
-      return { ...post, otherPostIds: postIds.map((post) => post.id) };
+      return { ...post, otherPostIds: postIds.map((post) => post.id) }; // return the post with other post ids
     } catch (error) {
       throw new NotFoundException(error.message);
     }
