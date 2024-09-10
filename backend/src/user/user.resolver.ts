@@ -93,7 +93,7 @@ export class UserResolver {
         return 'Hello World';
     }
 
-    // @UseGuards(GraphqlAuthGuard)
+    @UseGuards(GraphqlAuthGuard)
     @Mutation(() => User)
     async updateUserProfile(
         @Context() ctx: { req: Request },
@@ -101,19 +101,25 @@ export class UserResolver {
         @Args('bio', {type: () => String, nullable: true}) bio?: string,
         @Args('image', {type: () => GraphQLUpload, nullable: true}) image?: GraphQLUpload,
     ) {
+        console.log("ctx.req.user.sub: ", ctx.req.user.sub);
+        let imageUrl;
         if (image) {
-            await this.storeImageAndGetUrl(image);
+            imageUrl = await this.storeImageAndGetURL(image);
         }
-        return this.userService.updateProfile(ctx.req.user.sub, {fullName, bio, image});
+        return this.userService.updateProfile(ctx.req.user.sub, {fullName, bio, image: imageUrl});
     }
 
-    private async storeImageAndGetUrl(image: GraphQLUpload): Promise<string> {
-        const { createReadStream, filename} = await image;
+    private async storeImageAndGetURL(file: GraphQLUpload): Promise<string> {
+        const { createReadStream, filename } = await file;
+        const fileData = await file;
+        console.log('fileData!', fileData);
+    
         const uniqueFilename = `${uuidv4()}_${filename}`;
         const imagePath = join(process.cwd(), 'public', uniqueFilename);
         const imageUrl = `${process.env.APP_URL}/${uniqueFilename}`;
         const readStream = createReadStream();
         readStream.pipe(createWriteStream(imagePath));
-        return imageUrl;
-    }
+    
+        return imageUrl; // Return the appropriate URL where the file can be accessed
+      }
 }

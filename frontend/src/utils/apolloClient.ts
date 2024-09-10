@@ -9,6 +9,7 @@ import {
   
   import { createUploadLink } from "apollo-upload-client"
   import { onError } from "@apollo/client/link/error"
+import { useUserStore } from "../stores/userStore"
   
   async function refreshToken(client: ApolloClient<NormalizedCacheObject>) {
     try {
@@ -48,8 +49,19 @@ import {
     if (graphQLErrors) {
       for (const err of graphQLErrors) {
         if (err.extensions?.code === "UNAUTHENTICATED" && retryCount < maxRetry) {
+          if (err.extensions.originalError?.name === "Refresh token not found")
+          {
+            useUserStore.setState({
+              id: undefined,
+              fullName: "",
+              email: "",
+              image: "",
+              bio: "",
+            })
+          }
+          
           retryCount++
-  
+          
           return new Observable((observer) => {
             refreshToken(client)
               .then((token) => {
